@@ -160,19 +160,20 @@ Hooks.on('createItem', (item) => {
 });
 
 Hooks.on('setup', () => {
-    const ActorSheet5eCharacter = game.dnd5e.applications.actor.ActorSheet5eCharacter;
+    // _onDropStackConsumables was removed in dnd5e v3+; guard against missing class/method
+    const ActorSheet5eCharacter = game.dnd5e?.applications?.actor?.ActorSheet5eCharacter;
+    if (!ActorSheet5eCharacter) return;
     const ActorSheet5e = Object.getPrototypeOf(ActorSheet5eCharacter);
-    const prev = ActorSheet5e.prototype._onDropStackConsumables;
-    if (prev) {
-        ActorSheet5e.prototype._onDropStackConsumables = function(itemData) {
-            const scratchpadId = itemData.flags['party-inventory']?.scratchpadId;
-            const wrappedResult = prev.apply(this, [itemData]);
+    const prev = ActorSheet5e?.prototype?._onDropStackConsumables;
+    if (!prev) return;
+    ActorSheet5e.prototype._onDropStackConsumables = function(itemData) {
+        const scratchpadId = itemData.flags?.['party-inventory']?.scratchpadId;
+        const wrappedResult = prev.apply(this, [itemData]);
 
-            if (wrappedResult && scratchpadId) {
-                Scratchpad.requestDelete(scratchpadId);
-            }
+        if (wrappedResult && scratchpadId) {
+            Scratchpad.requestDelete(scratchpadId);
+        }
 
-            return wrappedResult;
-        };
-    }
+        return wrappedResult;
+    };
 });
