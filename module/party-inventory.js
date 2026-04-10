@@ -89,6 +89,11 @@ Hooks.on('renderActorSheet5eCharacter', (sheet, html, character) =>
 Hooks.on('renderActorSheet5eCharacter2', (sheet, html, context) =>
 {
     addTogglePartyButtonV2(html, sheet.actor);
+    // Handle clicks on the Party Inventory header control button
+    html.addEventListener('click', (e) =>
+    {
+        if (e.target.closest('[data-action="openPartyInventory"]')) PartyInventory.activate();
+    });
 });
 
 // Tidy 5e Sheets uses ApplicationV2 but fires renderActorSheetV2 instead
@@ -110,31 +115,20 @@ Hooks.on('renderActorSheetV2', (sheet, element, data) =>
     header.prepend(btn);
 });
 
-Hooks.on('getActorSheet5eCharacterHeaderButtons', (app, buttons) =>
+// V13 ApplicationV2 header controls hook — covers default dnd5e v4 sheet and any other AppV2 actor sheet
+Hooks.on('getHeaderControlsApplicationV2', (app, controls) =>
 {
-    buttons.unshift({
-        class: 'open-party-inventory-button',
+    if (!(app.actor instanceof Actor)) return;
+    if (app.element?.classList?.contains('tidy5e-sheet')) return; // Tidy handles its own header
+    controls.push({
         icon: 'fas fa-users',
         label: game.i18n.localize(`${localizationID}.button-title`),
-        onclick: () =>
-        {
-            PartyInventory.activate();
-        }
+        action: 'openPartyInventory',
+        ownership: 'OBSERVER'
     });
 });
-// dnd5e v4+ ApplicationV2 sheet header buttons
-Hooks.on('getActorSheet5eCharacter2HeaderButtons', (app, buttons) =>
-{
-    buttons.unshift({
-        class: 'open-party-inventory-button',
-        icon: 'fas fa-users',
-        label: game.i18n.localize(`${localizationID}.button-title`),
-        onclick: () =>
-        {
-            PartyInventory.activate();
-        }
-    });
-});
+
+
 Hooks.on('getSceneControlButtons', (controls) =>
 {
     const groupName = game.settings.get(moduleId, 'controlButtonGroup');
