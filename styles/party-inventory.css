@@ -2,6 +2,12 @@
     flex: 0 0 86px !important;
 }
 
+/* Allow the Tidy 5e actions column to grow dynamically to fit injected buttons */
+.tidy5e-sheet .tidy-table-cell[data-tidy-column-key="actions"] {
+    --tidy-table-column-width: min-content !important;
+    white-space: nowrap;
+}
+
 #party-inventory {
     min-width: 450px;
     min-height: 300px;
@@ -36,11 +42,13 @@
     align-items: center;
 }
 
-.scratchpad .item-delete, .scratchpad .item-split, .scratchpad .item-collapse {
+.scratchpad .item-delete,
+.scratchpad .item-split,
+.scratchpad .item-collapse {
     padding: 5px;
 }
 
-.scratchpad .item-split + .item-collapse {
+.scratchpad .item-split+.item-collapse {
     padding: 5px 5px 5px 0;
 }
 
@@ -73,7 +81,7 @@
     font-size: 12px;
 }
 
-.party-inventory__footnote > * {
+.party-inventory__footnote>* {
     margin-right: 15px;
     white-space: nowrap;
 }
@@ -97,8 +105,8 @@
 }
 
 .party-inventory__currency-row a {
-    background: rgba(0,0,0,.4);
-    color: rgba(236,233,223,1);
+    background: rgba(0, 0, 0, .4);
+    color: rgba(236, 233, 223, 1);
     border-radius: 5px;
     font-size: 18px;
     line-height: 30px;
@@ -121,7 +129,8 @@
     text-align: right;
 }
 
-#party-inventory-take-currency input, #party-inventory-split-currency input {
+#party-inventory-take-currency input,
+#party-inventory-split-currency input {
     background: none;
     border: 1px solid transparent;
 }

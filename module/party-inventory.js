@@ -48,9 +48,9 @@ Hooks.on('setup', () =>
         scope: 'client',
         config: true,
         type: String,
-        default: "token",
+        default: "tokens",
         choices: {
-            "token": `${localizationID}.token-group`,
+            "tokens": `${localizationID}.token-group`,
             "notes": `${localizationID}.notes-group`
         },
         onChange: debouncedReload
@@ -91,6 +91,25 @@ Hooks.on('renderActorSheet5eCharacter2', (sheet, html, context) =>
     addTogglePartyButtonV2(html, sheet.actor);
 });
 
+// Tidy 5e Sheets uses ApplicationV2 but fires renderActorSheetV2 instead
+Hooks.on('renderActorSheetV2', (sheet, element, data) =>
+{
+    if (!element.classList.contains('tidy5e-sheet')) return;
+    addTogglePartyButtonV2(element, sheet.actor);
+
+    // Add Party Inventory button to Tidy 5e sheet header if not already present
+    if (element.querySelector('.open-party-inventory-button')) return;
+    const header = element.querySelector('.sheet-header-buttons, .window-header .header-actions, .tidy5e-sheet .header-button-bar');
+    if (!header) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'open-party-inventory-button';
+    btn.title = game.i18n.localize(`${localizationID}.button-title`);
+    btn.innerHTML = `<i class="fas fa-users"></i> ${game.i18n.localize(`${localizationID}.button-title`)}`;
+    btn.addEventListener('click', () => PartyInventory.activate());
+    header.prepend(btn);
+});
+
 Hooks.on('getActorSheet5eCharacterHeaderButtons', (app, buttons) =>
 {
     buttons.unshift({
@@ -118,18 +137,18 @@ Hooks.on('getActorSheet5eCharacter2HeaderButtons', (app, buttons) =>
 });
 Hooks.on('getSceneControlButtons', (controls) =>
 {
-    const notes = controls.find((c) => c.name === game.settings.get(moduleId, 'controlButtonGroup'));
-    if (notes)
-    {
-        notes.tools.push({
-            name: moduleId,
-            title: `${localizationID}.button-title`,
-            icon: 'fas fa-users',
-            visible: true,
-            onClick: () => PartyInventory.activate(),
-            button: true
-        });
-    }
+    const groupName = game.settings.get(moduleId, 'controlButtonGroup');
+    const group = controls[groupName];
+    if (!group) return;
+    group.tools[moduleId] = {
+        name: moduleId,
+        title: `${localizationID}.button-title`,
+        icon: 'fas fa-users',
+        order: Object.keys(group.tools).length,
+        button: true,
+        visible: true,
+        onChange: () => PartyInventory.activate()
+    };
 });
 
 Hooks.on('updateItem', (item) =>
