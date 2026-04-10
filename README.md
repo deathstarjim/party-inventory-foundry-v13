@@ -1,6 +1,8 @@
-# Party Inventory add-on for Foundry VTT
+# Party Inventory add-on for Foundry VTT v13
 
 Adds a party inventory sheet and party inventory management controls to the character sheet. Allows writing down descriptive/story-based loot on a scratchpad in the party inventory sheet before distribution to the actual character inventories.
+
+This module was originally written by teroparvinen and the original code is in this repo: https://github.com/teroparvinen/foundry-party-inventory
 
 Supports Tidy5e.
 
