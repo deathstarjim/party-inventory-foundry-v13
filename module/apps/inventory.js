@@ -142,7 +142,13 @@ export class PartyInventory extends FormApplication
         items.forEach(i => { i.isStack = i.system.quantity > 1 });
         items.forEach(i => { i.charName = i.actor.name.split(' ')[0] });
 
-        const typeLabels = CONFIG.Item.typeLabels;
+        // Only expose valid dnd5e item types that have proper system data (avoids crashing sheets with "base" etc.)
+        const dnd5eItemTypes = ["weapon", "equipment", "consumable", "tool", "loot", "container"];
+        const typeLabels = Object.fromEntries(
+            Object.entries(CONFIG.Item.typeLabels)
+                .filter(([k]) => dnd5eItemTypes.includes(k))
+                .sort(([, a], [, b]) => game.i18n.localize(a).localeCompare(game.i18n.localize(b)))
+        );
 
         const scratchpadItems = foundry.utils.deepClone(Scratchpad.items);
         scratchpadItems.forEach(i =>
