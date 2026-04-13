@@ -6,7 +6,11 @@ export function addTogglePartyButtonV2(html, actor)
     const enableTitle = game.i18n.localize(`${localizationID}.enable-item-title`);
     const disableTitle = game.i18n.localize(`${localizationID}.disable-item-title`);
 
-    const itemEls = html.querySelectorAll('[data-item-id]');
+    const inventoryTab = html.querySelector('[data-tab="inventory"]');
+    const itemEls = (inventoryTab ?? html).querySelectorAll('[data-item-id]');
+
+    // Only physical item types belong in a party inventory
+    const physicalTypes = new Set(['weapon', 'equipment', 'consumable', 'tool', 'loot', 'container', 'backpack']);
 
     // Selector covers the primary dnd5e v4/v5 sheet item-control edit button patterns
     itemEls.forEach(itemEl =>
@@ -14,6 +18,7 @@ export function addTogglePartyButtonV2(html, actor)
         const currentItemId = itemEl.dataset.itemId;
         const currentItem = actor.items.get(currentItemId);
         if (!currentItem) return;
+        if (!physicalTypes.has(currentItem.type)) return;
 
         const isInPartyInventory = currentItem.getFlag(moduleId, 'inPartyInventory');
         const title = isInPartyInventory ? disableTitle : enableTitle;

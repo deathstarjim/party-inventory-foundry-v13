@@ -3,6 +3,7 @@ import { Currency } from '../currency.js';
 import { Scratchpad } from '../scratchpad.js';
 import { SplitCurrency } from './split-currency.js';
 import { TakeCurrency } from './take-currency.js';
+import { DistributeItem } from './distribute-item.js';
 
 export class PartyInventory extends FormApplication
 {
@@ -153,22 +154,47 @@ export class PartyInventory extends FormApplication
         const scratchpadItems = foundry.utils.deepClone(Scratchpad.items);
         scratchpadItems.forEach(i =>
         {
-            const qr = this.detectQuantity(i.name);
-            if (qr.quantity > 1)
+            // Support both explicit quantity field and legacy name-encoded quantity
+            if (i.quantity == null)
             {
+                const qr = this.detectQuantity(i.name);
                 i.quantity = qr.quantity;
             }
+            if (!i.quantity || i.quantity < 1) i.quantity = 1;
+            i.canSplit = i.quantity > 1;
+            i.hasFootnote = !!i.sourceData;
+            // Default collapsed so the description textarea is hidden unless the user opens it
+            if (i.isCollapsed == null) i.isCollapsed = true;
 
-            if (qr.quantity > 1 || i.sourceData)
+            // Show a truncated plain-text preview of the source item description
+            if (!i.description && i.sourceData?.system?.description?.value)
             {
-                i.hasFootnote = true;
+                const div = document.createElement('div');
+                div.innerHTML = i.sourceData.system.description.value;
+                const text = (div.textContent || div.innerText || '').trim();
+                if (text)
+                {
+                    i.sourceDescriptionPreview = text.length > 160 ? text.substring(0, 160) + '\u2026' : text;
+                    i.hasFootnote = true;
+                }
             }
         })
 
         const currency = Currency.values;
         const isGM = game.user.isGM;
 
-        return { items, typeLabels, scratchpadItems, currency, isGM };
+        const labels = {
+            splitItem: game.i18n.localize(`${localizationID}.split-item`),
+            distributeItem: game.i18n.localize(`${localizationID}.distribute-item-title`),
+            collapseItem: game.i18n.localize(`${localizationID}.collapse-item`),
+            deleteItem: game.i18n.localize(`${localizationID}.delete-item`),
+            namePlaceholder: game.i18n.localize(`${localizationID}.name-placeholder`),
+            descriptionPlaceholder: game.i18n.localize(`${localizationID}.description-placeholder`),
+            hasSourceData: game.i18n.localize(`${localizationID}.item-has-source-data`),
+            hasCustomDescription: game.i18n.localize(`${localizationID}.item-has-custom-description`),
+        };
+
+        return { items, typeLabels, scratchpadItems, currency, isGM, labels };
     }
 
     async _updateObject(event, formData)
@@ -334,23 +360,35 @@ export class PartyInventory extends FormApplication
                 Scratchpad.requestDelete(itemId);
                 break;
             case 'split':
-                const split = this.splitItem(item.name);
-                if (split)
                 {
-                    Scratchpad.requestUpdate(itemId, { name: split.source });
-                    Scratchpad.requestCreate({
-                        img: item.img,
-                        name: split.target,
-                        description: item.description,
-                        type: item.type,
-                        sourceData: item.sourceData
-                    }, { after: itemId });
+                    const qty = (item.quantity != null && item.quantity >= 1) ? item.quantity : this.detectQuantity(item.name).quantity;
+                    if (qty > 1)
+                    {
+                        const half1 = Math.ceil(qty / 2);
+                        const half2 = Math.floor(qty / 2);
+                        const cleanName = (item.quantity != null) ? item.name : this.detectQuantity(item.name).name;
+                        Scratchpad.requestUpdate(itemId, { name: cleanName, quantity: half1 });
+                        Scratchpad.requestCreate({
+                            img: item.img,
+                            name: cleanName,
+                            quantity: half2,
+                            description: item.description,
+                            type: item.type,
+                            sourceData: item.sourceData
+                        }, { after: itemId });
+                    }
+                    break;
                 }
-                break;
             case 'collapse':
                 item.isCollapsed = !item.isCollapsed;
                 Scratchpad.requestUpdate(itemId, item);
                 break;
+            case 'distribute':
+                {
+                    const distApp = new DistributeItem(itemId);
+                    distApp.render(true);
+                    break;
+                }
             case 'take-currency':
                 const takeApp = new TakeCurrency();
                 takeApp.render(true);
@@ -399,14 +437,16 @@ export class PartyInventory extends FormApplication
     {
         const item = Scratchpad.getItem(itemId);
 
-        const quantityInfo = this.detectQuantity(item.name);
+        const nameInfo = this.detectQuantity(item.name);
+        // Use explicit quantity field if present, fall back to name-encoded quantity for legacy items
+        const quantity = (item.quantity != null && item.quantity >= 1) ? item.quantity : nameInfo.quantity;
 
         let data = {
             type: item.type,
-            name: quantityInfo.name,
+            name: nameInfo.name,
             img: item.img,
             system: {
-                quantity: quantityInfo.quantity
+                quantity: quantity
             },
             flags: {
                 [moduleId]: {
@@ -454,12 +494,20 @@ export class PartyInventory extends FormApplication
 
         function createFromData(data)
         {
-            const name = data.system.quantity > 1 ? `${data.system.quantity} ${data.name}` : data.name;
-
+            const quantity = data.system?.quantity ?? 1;
+            let description = '';
+            if (data.system?.description?.value)
+            {
+                const div = document.createElement('div');
+                div.innerHTML = data.system.description.value;
+                description = (div.textContent || div.innerText || '').trim();
+            }
             Scratchpad.requestCreate({
                 type: data.type,
-                name: name,
+                name: data.name,
                 img: data.img,
+                quantity: quantity,
+                description: description,
                 sourceData: foundry.utils.duplicate(data)
             });
         }
