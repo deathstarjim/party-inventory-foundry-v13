@@ -15,7 +15,7 @@ export class PartyInventory extends FormApplication
 
         const overrides = {
             classes: ['dnd5e', 'sheet', 'actor'],
-            height: 480,
+            height: 600,
             width: 600,
             resizable: true,
             editable: true,
@@ -128,7 +128,7 @@ export class PartyInventory extends FormApplication
         return null;
     }
 
-    getData(options)
+    async getData(options)
     {
         const items = game
             .actors
@@ -152,7 +152,7 @@ export class PartyInventory extends FormApplication
         );
 
         const scratchpadItems = foundry.utils.deepClone(Scratchpad.items);
-        scratchpadItems.forEach(i =>
+        for (const i of scratchpadItems)
         {
             // Support both explicit quantity field and legacy name-encoded quantity
             if (i.quantity == null)
@@ -166,6 +166,17 @@ export class PartyInventory extends FormApplication
             // Default collapsed so the description textarea is hidden unless the user opens it
             if (i.isCollapsed == null) i.isCollapsed = true;
 
+            // Enrich HTML description so inline rolls and links are clickable
+            {
+                const TE = foundry.applications?.ux?.TextEditor?.implementation ?? TextEditor;
+                i.enrichedDescription = await TE.enrichHTML(i.description ?? '', { async: true });
+            }
+
+            // Pre-compute form field target for the editor helper
+            // Also populate this.object so FormApplication's activateEditor can read the initial content
+            i.descriptionTarget = `scratchpad.${i.id}.description`;
+            foundry.utils.setProperty(this.object, i.descriptionTarget, i.description ?? '');
+
             // Show a truncated plain-text preview of the source item description
             if (!i.description && i.sourceData?.system?.description?.value)
             {
@@ -178,7 +189,7 @@ export class PartyInventory extends FormApplication
                     i.hasFootnote = true;
                 }
             }
-        })
+        }
 
         const currency = Currency.values;
         const isGM = game.user.isGM;
@@ -199,11 +210,14 @@ export class PartyInventory extends FormApplication
 
     async _updateObject(event, formData)
     {
-        const { scratchpad, currency } = foundry.utils.expandObject(formData);
+        const expanded = foundry.utils.expandObject(formData);
+        const scratchpad = expanded.scratchpad ?? {};
+        const currency = expanded.currency;
 
         for (let id in scratchpad)
         {
             const existing = Scratchpad.getItem(id);
+            if (!existing) continue;
             const diff = foundry.utils.diffObject(existing, scratchpad[id]);
             if (!foundry.utils.isEmpty(diff))
             {
@@ -211,7 +225,7 @@ export class PartyInventory extends FormApplication
             }
         }
 
-        Currency.requestUpdate(currency);
+        if (currency) Currency.requestUpdate(currency);
     }
 
     activateListeners(html)
@@ -507,7 +521,7 @@ export class PartyInventory extends FormApplication
                 name: data.name,
                 img: data.img,
                 quantity: quantity,
-                description: description,
+                description: data.system?.description?.value ?? '',
                 sourceData: foundry.utils.duplicate(data)
             });
         }

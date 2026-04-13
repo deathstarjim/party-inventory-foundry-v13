@@ -109,6 +109,23 @@
 
 .party-inventory__description-container {
     padding-left: 35px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.party-inventory__description-container p {
+    margin: 2px 0;
+}
+
+.party-inventory__description-container .editor {
+    border: 1px solid var(--color-border-light-tertiary, #c9c7b8);
+    border-radius: 3px;
+}
+
+.party-inventory__description-container .editor-content,
+.party-inventory__description-container .ProseMirror {
+    min-height: 100px;
+    padding: 4px;
 }
 
 .party-inventory__footnote {

@@ -55,20 +55,14 @@
                             title="{{../labels.deleteItem}}"><i class="fas fa-trash"></i></a>
                     </div>
                     <div class="party-inventory__description-container">
-                        <textarea class="item-description" name="scratchpad.{{item.id}}.description" placeholder="{{../labels.descriptionPlaceholder}}">{{item.description}}</textarea>
+                        {{editor item.description target=item.descriptionTarget button=false editable=true engine="prosemirror"}}
                     </div>
-                    {{#if item.hasFootnote}}
+                    {{#if item.sourceData}}
                     <div class="party-inventory__footnote flexrow">
-                        {{#if item.sourceDescriptionPreview}}
-                        <div class="party-inventory__source-preview flex1">{{item.sourceDescriptionPreview}}</div>
-                        {{/if}}
-                        {{#if item.sourceData}}
                         <div class="party-inventory__footnote-data flex0">
                             <a class="preview-item"><i class="fas fa-info-circle"></i></a>
-                            {{../labels.hasSourceData}}{{#if item.description}},
-                            {{../labels.hasCustomDescription}}{{/if}}
+                            {{../labels.hasSourceData}}
                         </div>
-                        {{/if}}
                     </div>
                     {{/if}}
                 </li>
