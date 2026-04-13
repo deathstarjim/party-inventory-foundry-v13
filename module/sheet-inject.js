@@ -30,12 +30,14 @@ export function addTogglePartyButtonV2(html, actor)
 
         // Find any existing edit control to insert after
         const editControl = itemEl.querySelector('[data-action="edit"], [data-action="editDocument"], .item-control.item-edit');
-        // For Tidy 5e table rows, fall back to the actions cell (match by data attr or class)
+        // For Tidy 5e v2 table rows, fall back to the actions cell (match by data attr or class)
         const tidyActionsCell = editControl ? null : itemEl.querySelector('[data-tidy-column-key="actions"], .tidy-table-actions');
         // For default dnd5e v4 sheet in play mode (no edit buttons visible), fall back to the controls column
         const dnd5eControlsDiv = (!editControl && !tidyActionsCell) ? itemEl.querySelector('[data-column-id="controls"]') : null;
+        // For Tidy 5e classic sheet, fall back to the classic controls div
+        const tidyClassicControls = (!editControl && !tidyActionsCell && !dnd5eControlsDiv) ? itemEl.querySelector('.tidy5e-classic-controls') : null;
 
-        if (!editControl && !tidyActionsCell && !dnd5eControlsDiv) return;
+        if (!editControl && !tidyActionsCell && !dnd5eControlsDiv && !tidyClassicControls) return;
 
         const btn = document.createElement('a');
         btn.title = title;
@@ -68,7 +70,7 @@ export function addTogglePartyButtonV2(html, actor)
             else
                 dnd5eControlsDiv.appendChild(btn);
         }
-        else
+        else if (tidyActionsCell)
         {
             btn.className = `tidy-table-button party-inventory-module item-toggle ${activeClass}`;
             const contextMenuBtn = tidyActionsCell.querySelector('[data-action="showContextMenu"], a.tidy-table-button:has(.fa-ellipsis-vertical)');
@@ -76,6 +78,33 @@ export function addTogglePartyButtonV2(html, actor)
                 tidyActionsCell.insertBefore(btn, contextMenuBtn);
             else
                 tidyActionsCell.appendChild(btn);
+        }
+        else if (tidyClassicControls)
+        {
+            // Classic Tidy uses <button> elements; swap the <a> for a <button> to match
+            const classicBtn = document.createElement('button');
+            classicBtn.type = 'button';
+            classicBtn.title = title;
+            classicBtn.innerHTML = btn.innerHTML;
+            classicBtn.className = `item-list-button party-inventory-module item-toggle ${activeClass}`;
+            classicBtn.addEventListener('click', (e) =>
+            {
+                e.preventDefault();
+                e.stopPropagation();
+                const item = actor.items.get(currentItemId);
+                if (!item) return;
+                const current = item.getFlag(moduleId, 'inPartyInventory');
+                item.setFlag(moduleId, 'inPartyInventory', !current).then(() =>
+                {
+                    game.modules.get(moduleId).api.openWindow();
+                });
+            });
+            const editBtn = tidyClassicControls.querySelector('button[title="Edit Item"]');
+            if (editBtn)
+                tidyClassicControls.insertBefore(classicBtn, editBtn);
+            else
+                tidyClassicControls.appendChild(classicBtn);
+            return; // skip the generic btn which isn't appended here
         }
     });
 }

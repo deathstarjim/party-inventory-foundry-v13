@@ -13,6 +13,20 @@
     white-space: nowrap;
 }
 
+/* Style the party inventory button in the classic Tidy 5e sheet controls */
+.tidy5e-sheet.classic .tidy5e-classic-controls button.party-inventory-module {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+    background: none;
+    border: none;
+    padding: 0 2px;
+    cursor: pointer;
+    color: inherit;
+    font-size: inherit;
+}
+
 #party-inventory {
     min-width: 450px;
     min-height: 300px;
