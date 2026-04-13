@@ -20,7 +20,7 @@ export class PartyInventory extends FormApplication
             resizable: true,
             editable: true,
             id: moduleId,
-            template: `modules/${moduleId}/templates/party-inventory.hbs`,
+            template: `modules/${moduleId}/templates/party-inventory-foundry-v13.hbs`,
             title: `${localizationID}.window-title`,
             userId: game.userId,
             closeOnSubmit: false,

@@ -206,7 +206,7 @@ Hooks.on('setup', () =>
     if (!prev) return;
     ActorSheet5e.prototype._onDropStackConsumables = function (itemData)
     {
-        const scratchpadId = itemData.flags?.['party-inventory']?.scratchpadId;
+        const scratchpadId = itemData.flags?.[moduleId]?.scratchpadId;
         const wrappedResult = prev.apply(this, [itemData]);
 
         if (wrappedResult && scratchpadId)

@@ -1,7 +1,7 @@
 {
-    "id": "party-inventory",
-    "title": "Party Inventory",
-    "description": "Shows items carried by characters flagged as Party Loot in one list.",
+    "id": "party-inventory-foundry-v13",
+    "title": "Party Inventory (Foundry V13)",
+    "description": "Shows items carried by characters flagged as Party Loot in one list. Items can be added to the list by dragging and dropping them from character inventories, and can be distributed to characters from the list as well.",
     "authors": [
         {
             "name": "Jim Piller"
@@ -21,10 +21,10 @@
         ]
     },
     "esmodules": [
-        "./module/party-inventory.js"
+        "./module/party-inventory-foundry-v13.js"
     ],
     "styles": [
-        "styles/party-inventory.css"
+        "styles/party-inventory-foundry-v13.css"
     ],
     "languages": [
         {
@@ -36,6 +36,6 @@
     "socket": true,
     "url": "https://github.com/deathstarjim/party-inventory-foundry-v13",
     "bugs": "https://github.com/deathstarjim/party-inventory-foundry-v13/issues",
-    "manifest": "https://raw.githubusercontent.com/deathstarjim/party-inventory-foundry-v13/main/module.json",
-    "download": "https://github.com/deathstarjim/party-inventory-foundry-v13/archive/refs/tags/v13.2.0.zip"
+    "manifest": "https://github.com/deathstarjim/party-inventory-foundry-v13/releases/latest/download/module.json",
+    "download": "https://github.com/deathstarjim/party-inventory-foundry-v13/releases/download/13.2.0/module.zip"
 }
