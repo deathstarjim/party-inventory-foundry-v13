@@ -4,10 +4,10 @@
     "description": "Shows items carried by characters flagged as Party Loot in one list.",
     "authors": [
         {
-            "name": "Tero Parvinen (tero.p)"
+            "name": "Jim Piller"
         }
     ],
-    "version": "13.1.0",
+    "version": "13.2.0",
     "compatibility": {
         "minimum": 11,
         "verified": 13
