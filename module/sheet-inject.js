@@ -32,8 +32,10 @@ export function addTogglePartyButtonV2(html, actor)
         const editControl = itemEl.querySelector('[data-action="edit"], [data-action="editDocument"], .item-control.item-edit');
         // For Tidy 5e table rows, fall back to the actions cell (match by data attr or class)
         const tidyActionsCell = editControl ? null : itemEl.querySelector('[data-tidy-column-key="actions"], .tidy-table-actions');
+        // For default dnd5e v4 sheet in play mode (no edit buttons visible), fall back to the controls column
+        const dnd5eControlsDiv = (!editControl && !tidyActionsCell) ? itemEl.querySelector('[data-column-id="controls"]') : null;
 
-        if (!editControl && !tidyActionsCell) return;
+        if (!editControl && !tidyActionsCell && !dnd5eControlsDiv) return;
 
         const btn = document.createElement('a');
         btn.title = title;
@@ -57,10 +59,19 @@ export function addTogglePartyButtonV2(html, actor)
             btn.className = `item-control party-inventory-module item-toggle ${activeClass}`;
             editControl.insertAdjacentElement('afterend', btn);
         }
+        else if (dnd5eControlsDiv)
+        {
+            btn.className = `unbutton config-button item-control item-action always-interactive party-inventory-module item-toggle ${activeClass}`;
+            const contextMenuBtn = dnd5eControlsDiv.querySelector('[data-context-menu]');
+            if (contextMenuBtn)
+                dnd5eControlsDiv.insertBefore(btn, contextMenuBtn);
+            else
+                dnd5eControlsDiv.appendChild(btn);
+        }
         else
         {
             btn.className = `tidy-table-button party-inventory-module item-toggle ${activeClass}`;
-            const contextMenuBtn = tidyActionsCell.querySelector('[data-action="showContextMenu"]');
+            const contextMenuBtn = tidyActionsCell.querySelector('[data-action="showContextMenu"], a.tidy-table-button:has(.fa-ellipsis-vertical)');
             if (contextMenuBtn)
                 tidyActionsCell.insertBefore(btn, contextMenuBtn);
             else

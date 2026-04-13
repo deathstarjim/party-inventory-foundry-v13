@@ -2,6 +2,11 @@
     flex: 0 0 86px !important;
 }
 
+/* Widen the controls column in the dnd5e v4 default sheet to accommodate the injected party inventory button */
+.dnd5e2 .items-section .item .item-controls:has(.party-inventory-module) {
+    width: 90px !important;
+}
+
 /* Allow the Tidy 5e actions column to grow dynamically to fit injected buttons */
 .tidy5e-sheet .tidy-table-cell[data-tidy-column-key="actions"] {
     --tidy-table-column-width: min-content !important;

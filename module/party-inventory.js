@@ -96,12 +96,14 @@ Hooks.on('renderActorSheet5eCharacter2', (sheet, html, context) =>
     });
 });
 
-// Tidy 5e Sheets uses ApplicationV2 but fires renderActorSheetV2 instead
+// All ApplicationV2 actor sheets fire renderActorSheetV2 (default dnd5e v4 and Tidy 5e)
 Hooks.on('renderActorSheetV2', (sheet, element, data) =>
 {
-    if (!element.classList.contains('tidy5e-sheet')) return;
+    if (sheet.actor?.type !== 'character') return;
     addTogglePartyButtonV2(element, sheet.actor);
 
+    // Tidy 5e-specific: add Party Inventory button to sheet header
+    if (!element.classList.contains('tidy5e-sheet')) return;
     // Add Party Inventory button to Tidy 5e sheet header if not already present
     if (element.querySelector('.open-party-inventory-button')) return;
     const header = element.querySelector('.sheet-header-buttons, .window-header .header-actions, .tidy5e-sheet .header-button-bar');
