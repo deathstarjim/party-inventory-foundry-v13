@@ -39,10 +39,12 @@ export function addTogglePartyButtonV2(html, actor)
         const tidyActionsCell = editControl ? null : itemEl.querySelector('[data-tidy-column-key="actions"], .tidy-table-actions');
         // For default dnd5e v4 sheet in play mode (no edit buttons visible), fall back to the controls column
         const dnd5eControlsDiv = (!editControl && !tidyActionsCell) ? itemEl.querySelector('[data-column-id="controls"]') : null;
+        // dnd5e v5: controls wrapper may lack data-column-id; fall back to a direct .item-control[data-context-menu] on the row
+        const dnd5eContextMenuBtn = (!editControl && !tidyActionsCell && !dnd5eControlsDiv) ? itemEl.querySelector('.item-control[data-context-menu]') : null;
         // For Tidy 5e classic sheet, fall back to the classic controls div
-        const tidyClassicControls = (!editControl && !tidyActionsCell && !dnd5eControlsDiv) ? itemEl.querySelector('.tidy5e-classic-controls') : null;
+        const tidyClassicControls = (!editControl && !tidyActionsCell && !dnd5eControlsDiv && !dnd5eContextMenuBtn) ? itemEl.querySelector('.tidy5e-classic-controls') : null;
 
-        if (!editControl && !tidyActionsCell && !dnd5eControlsDiv && !tidyClassicControls) return;
+        if (!editControl && !tidyActionsCell && !dnd5eControlsDiv && !dnd5eContextMenuBtn && !tidyClassicControls) return;
 
         const btn = document.createElement('a');
         btn.title = title;
@@ -74,6 +76,11 @@ export function addTogglePartyButtonV2(html, actor)
                 dnd5eControlsDiv.insertBefore(btn, contextMenuBtn);
             else
                 dnd5eControlsDiv.appendChild(btn);
+        }
+        else if (dnd5eContextMenuBtn)
+        {
+            btn.className = `unbutton config-button item-control item-action always-interactive party-inventory-module item-toggle ${activeClass}`;
+            dnd5eContextMenuBtn.insertAdjacentElement('beforebegin', btn);
         }
         else if (tidyActionsCell)
         {

@@ -37,7 +37,7 @@
                             value="{{item.quantity}}" min="1" placeholder="1" data-dtype="Number" />
                         {{#if item.canSplit}}
                         <a class="item-control item-split flex0" data-action="split" title="{{../labels.splitItem}}"><i
-                                class="fas fa-share-alt"></i></a>
+                                class="fas fa-share-nodes"></i></a>
                         {{/if}}
                         <a class="item-control item-distribute flex0" data-action="distribute"
                             title="{{../labels.distributeItem}}"><i class="fas fa-share"></i></a>
@@ -60,7 +60,7 @@
                     {{#if item.sourceData}}
                     <div class="party-inventory__footnote flexrow">
                         <div class="party-inventory__footnote-data flex0">
-                            <a class="preview-item"><i class="fas fa-info-circle"></i></a>
+                            <a class="preview-item"><i class="fas fa-circle-info"></i></a>
                             {{../labels.hasSourceData}}
                         </div>
                     </div>
@@ -104,11 +104,11 @@
             </div>
             {{#unless isGM}}
             <a data-action="take-currency" title="{{localize " PARTY-INVENTORY.take-currency"}}">
-                <i class="fas fa-hand-paper fa-rotate-90"></i>
+                <i class="fas fa-hand fa-rotate-90"></i>
             </a>
             {{/unless}}
             <a data-action="split-currency" title="{{localize " PARTY-INVENTORY.split-currency"}}">
-                <i class="fas fa-hands-helping"></i>
+                <i class="fas fa-handshake-angle"></i>
             </a>
         </div>
     </div>
